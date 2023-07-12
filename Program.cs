@@ -1,6 +1,9 @@
 ﻿using Salaros.Configuration;
 using System.Net;
 using System.Text;
+using System.Management;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 public class Program
 {
@@ -136,26 +139,23 @@ public class Program
 
                         case "/system/info":
                             {
-                                var presponse = new
-                                {
-                                    message = "Example Request",
-                                    error = "This is an example request"
-                                };
-                                var pjson = Newtonsoft.Json.JsonConvert.SerializeObject(presponse);
-                                var pBuffer = Encoding.UTF8.GetBytes(pjson);
+                                var osInfo = GetOperatingSystemInfo();
+                                var osInfoJson = Newtonsoft.Json.JsonConvert.SerializeObject(osInfo);
+                                var buffer = Encoding.UTF8.GetBytes(osInfoJson);
 
                                 response.StatusCode = (int)HttpStatusCode.OK;
                                 response.ContentType = "application/json";
                                 response.ContentEncoding = Encoding.UTF8;
-                                response.ContentLength64 = pBuffer.Length;
+                                response.ContentLength64 = buffer.Length;
 
                                 using (var responseStream = response.OutputStream)
                                 {
-                                    responseStream.Write(pBuffer, 0, pBuffer.Length);
+                                    responseStream.Write(buffer, 0, buffer.Length);
                                 }
 
                                 break;
                             }
+
 
                         default:
                             {
@@ -200,6 +200,125 @@ public class Program
                     {
                         responseStream.Write(errorBuffer, 0, errorBuffer.Length);
                     }
+                }
+            }
+        }
+    }
+
+    private static dynamic GetOperatingSystemInfo()
+    {
+        var osInfo = new SystemInfo();
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var osQuery = new ObjectQuery("SELECT Caption, Version, BuildNumber FROM Win32_OperatingSystem");
+            var osSearcher = new ManagementObjectSearcher(osQuery);
+            var osCollection = osSearcher.Get();
+
+            foreach (var managementObject in osCollection)
+            {
+                osInfo.OperatingSystem = managementObject["Caption"].ToString();
+                osInfo.Version = managementObject["Version"].ToString();
+                osInfo.BuildNumber = managementObject["BuildNumber"].ToString();
+            }
+
+            var ramQuery = new ObjectQuery("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
+            var ramSearcher = new ManagementObjectSearcher(ramQuery);
+            var ramCollection = ramSearcher.Get();
+
+            foreach (var managementObject in ramCollection)
+            {
+                var totalMemorySize = Convert.ToInt64(managementObject["TotalVisibleMemorySize"]);
+                osInfo.TotalRAM = totalMemorySize / 1024; 
+            }
+
+            var diskQuery = new ObjectQuery("SELECT Size, FreeSpace FROM Win32_LogicalDisk WHERE DriveType = 3");
+            var diskSearcher = new ManagementObjectSearcher(diskQuery);
+            var diskCollection = diskSearcher.Get();
+
+            long totalDiskSpace = 0;
+            long totalFreeSpace = 0;
+
+            foreach (var managementObject in diskCollection)
+            {
+                totalDiskSpace += Convert.ToInt64(managementObject["Size"]);
+                totalFreeSpace += Convert.ToInt64(managementObject["FreeSpace"]);
+            }
+
+            osInfo.TotalDiskSpace = totalDiskSpace / (1024 * 1024 * 1024);
+            osInfo.FreeDiskSpace = totalFreeSpace / (1024 * 1024 * 1024);
+
+            var cpuQuery = new ObjectQuery("SELECT Name FROM Win32_Processor");
+            var cpuSearcher = new ManagementObjectSearcher(cpuQuery);
+            var cpuCollection = cpuSearcher.Get();
+
+            foreach (var managementObject in cpuCollection)
+            {
+                osInfo.CPU = managementObject["Name"].ToString();
+            }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            osInfo.OperatingSystem = RuntimeInformation.OSDescription;
+            var memInfo = new MemoryInfo();
+            memInfo.ParseFile("/proc/meminfo");
+            osInfo.TotalRAM = memInfo.MemTotal / 1024;
+            var driveInfo = new DriveInfo("/");
+            osInfo.TotalDiskSpace = driveInfo.TotalSize / (1024 * 1024 * 1024);
+            osInfo.FreeDiskSpace = driveInfo.AvailableFreeSpace / (1024 * 1024 * 1024);
+            osInfo.CPU = GetLinuxCPUInfo();
+        }
+
+        return osInfo;
+    }
+
+    private static string GetLinuxCPUInfo()
+    {
+        try
+        {
+            string cpuInfo = File.ReadAllText("/proc/cpuinfo");
+            var match = Regex.Match(cpuInfo, @"model name\s+:\s+(.+)");
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to retrieve CPU information: {ex.Message}");
+        }
+
+        return string.Empty;
+    }
+
+    private class SystemInfo
+    {
+        public string OperatingSystem { get; set; }
+        public string Version { get; set; }
+        public string BuildNumber { get; set; }
+        public long TotalRAM { get; set; }
+        public long TotalDiskSpace { get; set; }
+        public long FreeDiskSpace { get; set; }
+        public string CPU { get; set; }
+    }
+
+    private class MemoryInfo
+    {
+        public long MemTotal { get; set; }
+
+        public void ParseFile(string filePath)
+        {
+            var lines = File.ReadAllLines(filePath);
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("MemTotal:"))
+                {
+                    var match = Regex.Match(line, @"\d+");
+                    if (match.Success)
+                    {
+                        MemTotal = long.Parse(match.Value);
+                    }
+                    break;
                 }
             }
         }

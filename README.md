@@ -24,6 +24,18 @@ Response codes that you can get if you use our api:
 | `405` | `Method Not Allowed` | The request HTTP method is known by the server but has been disabled and cannot be used for that resource. |
 | `500` | `Internal Server Error` | The server encountered an unexpected condition that prevented it from fulfilling the request. |
 
+### System
+`GET /api/system`
+Returns the system information for the host that our daemon is running on.
+
+### Responses
+
+| Code | Description                                  |
+| ---- | -------------------------------------------- |
+| 200  | The request was successful.                  |
+| 400  | The system information could not be fetched. |
+
+
 ## Suport us
 You can support us via PayPal at:
 
