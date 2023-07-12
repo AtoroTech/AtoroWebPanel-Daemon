@@ -1,0 +1,222 @@
+﻿using Salaros.Configuration;
+using System.Net;
+using System.Text;
+
+public class Program
+{
+    private static string d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
+    public static string d_host = string.Empty;
+    public static string d_protocol = string.Empty;
+    public static string d_port = string.Empty;
+    public static string d_key = string.Empty;
+    public static string d_ssl = string.Empty;
+
+    public static void Main(string[] args)
+    {
+        LoadSettings();        
+        var serverThread = new Thread(StartServer);
+        serverThread.Start();
+        Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Daemon started", DateTime.Now);
+        Console.ReadKey();
+        StopServer();
+    } 
+
+    private static void LoadSettings()
+    {
+        try
+        {
+            var cfg = new ConfigParser(d_settings);
+            if (!File.Exists(d_settings))
+            {
+                cfg.SetValue("Daemon", "host", "127.0.0.1");
+                cfg.SetValue("Daemon", "useSSL", "false");
+                cfg.SetValue("Daemon", "port", "3000");
+                cfg.SetValue("Daemon", "key", "");
+                cfg.Save(d_settings);
+                Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Looks like this is your first time running our daemon please close the app go into config.ini and config your app",DateTime.Now);
+                Environment.Exit(0x0);                
+            }
+            d_host = cfg.GetValue("Daemon", "host");
+            d_port = cfg.GetValue("Daemon", "port");
+            d_key = cfg.GetValue("Daemon", "key");
+            d_ssl = cfg.GetValue("Daemon", "useSSL");
+            if (d_ssl == "true")
+            {
+                d_protocol = "https://";
+            }
+            else
+            {
+                d_protocol = "http://";
+            }
+            if (d_host == "")
+            {
+                d_host = "127.0.0.1";
+            }
+            if (d_port == "")
+            {
+                d_port = "3000";
+            }
+            if (d_key == "")
+            {
+                Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Faild to start: 'Please use a strong key'", DateTime.Now);
+                Environment.Exit(0x0);
+            }
+            Console.WriteLine("[{0:HH:mm:ss}] (CONFIG) Loaded daemon config from 'config.ini'", DateTime.Now);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[{0:HH:mm:ss}] (CONFIG) Faild to load config: " + ex.Message, DateTime.Now);
+            Environment.Exit(0x0);
+        }
+    }
+
+    private static void StartServer()
+    {
+        using (var listener = new HttpListener())
+        {
+            Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Started webserver on: " + d_protocol + d_host + ":" + d_port, DateTime.Now);
+            listener.Prefixes.Add(d_protocol + d_host + ":" + d_port + "/");
+            listener.Start();
+
+            while (listener.IsListening)
+            {
+                var context = listener.GetContext();
+                var request = context.Request;
+                var response = context.Response;
+
+                if (IsAuthorized(request))
+                {
+                    switch (request.Url.AbsolutePath)
+                    {
+                        case "/":
+                            {
+                                var errorResponse = new
+                                {
+                                    message = "Bad Request",
+                                    error = "Please provide a valid API endpoint."
+                                };
+                                var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
+                                var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
+
+                                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                                response.ContentType = "application/json";
+                                response.ContentEncoding = Encoding.UTF8;
+                                response.ContentLength64 = errorBuffer.Length;
+
+                                using (var responseStream = response.OutputStream)
+                                {
+                                    responseStream.Write(errorBuffer, 0, errorBuffer.Length);
+                                }
+
+                                break;
+                            }
+
+                        case "/test":
+                            {
+                                var presponse = new
+                                {
+                                    message = "Example Request",
+                                    error = "This is an example request"
+                                };
+                                var pjson = Newtonsoft.Json.JsonConvert.SerializeObject(presponse);
+                                var pBuffer = Encoding.UTF8.GetBytes(pjson);
+
+                                response.StatusCode = (int)HttpStatusCode.OK;
+                                response.ContentType = "application/json";
+                                response.ContentEncoding = Encoding.UTF8;
+                                response.ContentLength64 = pBuffer.Length;
+
+                                using (var responseStream = response.OutputStream)
+                                {
+                                    responseStream.Write(pBuffer, 0, pBuffer.Length);
+                                }
+
+                                break;
+                            }
+
+                        case "/system/info":
+                            {
+                                var presponse = new
+                                {
+                                    message = "Example Request",
+                                    error = "This is an example request"
+                                };
+                                var pjson = Newtonsoft.Json.JsonConvert.SerializeObject(presponse);
+                                var pBuffer = Encoding.UTF8.GetBytes(pjson);
+
+                                response.StatusCode = (int)HttpStatusCode.OK;
+                                response.ContentType = "application/json";
+                                response.ContentEncoding = Encoding.UTF8;
+                                response.ContentLength64 = pBuffer.Length;
+
+                                using (var responseStream = response.OutputStream)
+                                {
+                                    responseStream.Write(pBuffer, 0, pBuffer.Length);
+                                }
+
+                                break;
+                            }
+
+                        default:
+                            {
+                                var errorResponse = new
+                                {
+                                    message = "Page not found",
+                                    error = "The requested page does not exist."
+                                };
+                                var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
+                                var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
+
+                                response.StatusCode = (int)HttpStatusCode.NotFound;
+                                response.ContentType = "application/json";
+                                response.ContentEncoding = Encoding.UTF8;
+                                response.ContentLength64 = errorBuffer.Length;
+
+                                using (var responseStream = response.OutputStream)
+                                {
+                                    responseStream.Write(errorBuffer, 0, errorBuffer.Length);
+                                }
+
+                                break;
+                            }
+                    }
+                }
+                else
+                {
+                    var errorResponse = new
+                    {
+                        message = "Unauthorized",
+                        error = "API key not provided or invalid."
+                    };
+                    var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
+                    var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
+
+                    response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    response.ContentType = "application/json";
+                    response.ContentEncoding = Encoding.UTF8;
+                    response.ContentLength64 = errorBuffer.Length;
+
+                    using (var responseStream = response.OutputStream)
+                    {
+                        responseStream.Write(errorBuffer, 0, errorBuffer.Length);
+                    }
+                }
+            }
+        }
+    }
+
+
+    private static bool IsAuthorized(HttpListenerRequest request)
+    {
+        string apiKey = request.Headers["api_key"];
+        bool authorized = (apiKey == d_key);
+
+        return authorized;
+    }
+
+    private static void StopServer()
+    {
+        Environment.Exit(0x0);
+    }
+
+}
