@@ -6,7 +6,7 @@
     <RootNamespace>McControllerX_Daemon</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <StartupObject>Program</StartupObject>
+    <StartupObject>McControllerX.Program</StartupObject>
     <ApplicationIcon>MythicalNodesRound.ico</ApplicationIcon>
     <Title>McControllerX</Title>
     <Authors>MythicalSystems</Authors>
