@@ -36,6 +36,8 @@ Returns the system information for the host that our daemon is running on.
 | 400  | The system information could not be fetched. |
 
 
+
+
 ## Suport us
 You can support us via PayPal at:
 

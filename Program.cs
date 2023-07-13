@@ -1,15 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.IO;
-using System.Management;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Salaros.Configuration;
+using System.Net;
+using System.Text;
 
 public class Program
 {
@@ -25,13 +19,18 @@ public class Program
         LoadSettings();
 
         var host = new WebHostBuilder()
-            .UseKestrel()
+            .UseKestrel(options =>
+            {
+                int port = int.Parse(d_port);
+                options.Listen(IPAddress.Any, port);
+            })
             .Configure(ConfigureApp)
             .Build();
 
         Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Daemon started", DateTime.Now);
         host.Run();
     }
+
 
     private static void LoadSettings()
     {
@@ -99,61 +98,61 @@ public class Program
             switch (absolutePath)
             {
                 case "":
-                {
-                    var errorResponse = new
                     {
-                        message = "Bad Request",
-                        error = "Please provide a valid API endpoint."
-                    };
-                    var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
-                    var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
+                        var errorResponse = new
+                        {
+                            message = "Bad Request",
+                            error = "Please provide a valid API endpoint."
+                        };
+                        var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
+                        var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
 
-                    response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    response.ContentType = "application/json";
-                    response.ContentLength = errorBuffer.Length;
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        response.ContentType = "application/json";
+                        response.ContentLength = errorBuffer.Length;
 
-                    await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
+                        await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
 
-                    break;
-                }
+                        break;
+                    }
 
                 case "test":
-                {
-                    var presponse = new
                     {
-                        message = "Example Request",
-                        error = "This is an example request"
-                    };
-                    var pjson = Newtonsoft.Json.JsonConvert.SerializeObject(presponse);
-                    var pBuffer = Encoding.UTF8.GetBytes(pjson);
+                        var presponse = new
+                        {
+                            message = "Example Request",
+                            error = "This is an example request"
+                        };
+                        var pjson = Newtonsoft.Json.JsonConvert.SerializeObject(presponse);
+                        var pBuffer = Encoding.UTF8.GetBytes(pjson);
 
-                    response.StatusCode = (int)HttpStatusCode.OK;
-                    response.ContentType = "application/json";
-                    response.ContentLength = pBuffer.Length;
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                        response.ContentType = "application/json";
+                        response.ContentLength = pBuffer.Length;
 
-                    await response.Body.WriteAsync(pBuffer, 0, pBuffer.Length);
+                        await response.Body.WriteAsync(pBuffer, 0, pBuffer.Length);
 
-                    break;
-                }
+                        break;
+                    }
 
                 default:
-                {
-                    var errorResponse = new
                     {
-                        message = "Page not found",
-                        error = "The requested page does not exist."
-                    };
-                    var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
-                    var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
+                        var errorResponse = new
+                        {
+                            message = "Page not found",
+                            error = "The requested page does not exist."
+                        };
+                        var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
+                        var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
 
-                    response.StatusCode = (int)HttpStatusCode.NotFound;
-                    response.ContentType = "application/json";
-                    response.ContentLength = errorBuffer.Length;
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        response.ContentType = "application/json";
+                        response.ContentLength = errorBuffer.Length;
 
-                    await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
+                        await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
 
-                    break;
-                }
+                        break;
+                    }
             }
         }
         else
