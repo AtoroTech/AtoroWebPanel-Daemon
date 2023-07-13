@@ -6,6 +6,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 
+
 namespace McControllerX
 {
     public class Program
@@ -14,18 +15,24 @@ namespace McControllerX
         public static string d_port = string.Empty;
         public static string d_key = string.Empty;
         public static string d_os = string.Empty;
-        public static string d_settings = string.Empty;
+        public static string d_settings = string.Empty;        
+        public static string os_name = string.Empty;
+        public static string os_cpu = string.Empty;
+        public static long os_disk;
+        public static long os_ram;
+        public static string os_uptime = string.Empty;
         public static string mcascii = @" 
-      __  __       _____            _             _ _        __   __
-     |  \/  |     / ____|          | |           | | |       \ \ / /
-     | \  / | ___| |     ___  _ __ | |_ _ __ ___ | | | ___ _ _\ V / 
-     | |\/| |/ __| |    / _ \| '_ \| __| '__/ _ \| | |/ _ \ '__> <  
-     | |  | | (__| |___| (_) | | | | |_| | | (_) | | |  __/ | / . \ 
-     |_|  |_|\___|\_____\___/|_| |_|\__|_|  \___/|_|_|\___|_|/_/ \_\
+    __  __       _____            _             _ _        __   __
+    |  \/  |     / ____|          | |           | | |       \ \ / /
+    | \  / | ___| |     ___  _ __ | |_ _ __ ___ | | | ___ _ _\ V / 
+    | |\/| |/ __| |    / _ \| '_ \| __| '__/ _ \| | |/ _ \ '__> <  
+    | |  | | (__| |___| (_) | | | | |_| | | (_) | | |  __/ | / . \ 
+    |_|  |_|\___|\_____\___/|_| |_|\__|_|  \___/|_|_|\___|_|/_/ \_\
     
-     ";
+    ";
         public static string version = "1.0.0";
         public static Logger logger = new Logger();
+        
         public static void Main(string[] args)
         {
             Console.Clear();
@@ -78,7 +85,6 @@ namespace McControllerX
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Failed to generate a key: " + ex.Message, DateTime.Now);
                     Environment.Exit(0x0);
                 }
-
             }
             else if (args.Contains("-resetkey"))
             {
@@ -110,7 +116,6 @@ namespace McControllerX
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Failed to generate a key: " + ex.Message, DateTime.Now);
                     Environment.Exit(0x0);
                 }
-
             }
             else if (args.Length > 0)
             {
@@ -119,6 +124,7 @@ namespace McControllerX
             }
             logger.Log(LogType.Info, "Please wait while we start McControllerX");
             LoadSettings();
+            getOsInfo();
             var host = new WebHostBuilder()
                 .UseKestrel(options =>
                 {
@@ -127,12 +133,43 @@ namespace McControllerX
                 })
                 .Configure(ConfigureApp)
                 .Build();
-
             logger.Log(LogType.Info, "Daemon started on: " + d_host + ":" + d_port);
             logger.Log(LogType.Info, "Secret key: " + d_key);
             host.Run();
+            
         }
+        private static async void getOsInfo() {
+            if (d_os == "win") {
 
+            }
+            else if (d_os == "linux") {
+                BashHelper bashHelper = new BashHelper();
+                LinuxMetricsService metricsService = new LinuxMetricsService(bashHelper);
+                try
+                {
+                    string osName = await metricsService.GetOsName();
+                    os_name = osName.Replace("\n", "");
+                    string osCpu = await metricsService.GetCpuModel();
+                    os_cpu = osCpu.Replace("\n", "");
+                    os_disk = await metricsService.GetTotalDisk();
+                    os_ram = await metricsService.GetTotalMemory();
+                    string osUptime = await metricsService.GetUptime();
+                    os_uptime = osUptime.Replace("\n", "");
+                    logger.Log(LogType.Info, "Operating System: "+os_name);
+                    logger.Log(LogType.Info, "CPU: "+os_cpu);
+                    logger.Log(LogType.Info, "DISK: "+os_disk);
+                    logger.Log(LogType.Info, "RAM: "+os_ram);
+                    logger.Log(LogType.Info, "UPTIME: "+os_uptime);
+                    
+                }
+                catch (Exception ex)
+                {
+                    logger.Log(LogType.Error, "Faild to get the os info: '"+ex.Message+"'");
+                }
+            }
+            else {
+            }
+        }
         private static void LoadSettings()
         {
             try
@@ -189,21 +226,17 @@ namespace McControllerX
                 Environment.Exit(0x0);
             }
         }
-
         private static void ConfigureApp(IApplicationBuilder app)
         {
             app.Run(ProcessRequest);
         }
-
         private static async Task ProcessRequest(HttpContext context)
         {
             var request = context.Request;
             var response = context.Response;
-
             if (IsAuthorized(request))
             {
                 var absolutePath = request.Path.Value.TrimStart('/');
-
                 switch (absolutePath)
                 {
                     case "":
@@ -215,16 +248,12 @@ namespace McControllerX
                             };
                             var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
                             var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
-
                             response.StatusCode = (int)HttpStatusCode.BadRequest;
                             response.ContentType = "application/json";
                             response.ContentLength = errorBuffer.Length;
-
                             await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
-
                             break;
                         }
-
                     case "test":
                         {
                             var presponse = new
@@ -234,16 +263,12 @@ namespace McControllerX
                             };
                             var pjson = Newtonsoft.Json.JsonConvert.SerializeObject(presponse);
                             var pBuffer = Encoding.UTF8.GetBytes(pjson);
-
                             response.StatusCode = (int)HttpStatusCode.OK;
                             response.ContentType = "application/json";
                             response.ContentLength = pBuffer.Length;
-
                             await response.Body.WriteAsync(pBuffer, 0, pBuffer.Length);
-
                             break;
                         }
-
                     default:
                         {
                             var errorResponse = new
@@ -253,13 +278,10 @@ namespace McControllerX
                             };
                             var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
                             var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
-
                             response.StatusCode = (int)HttpStatusCode.NotFound;
                             response.ContentType = "application/json";
                             response.ContentLength = errorBuffer.Length;
-
                             await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
-
                             break;
                         }
                 }
@@ -273,38 +295,34 @@ namespace McControllerX
                 };
                 var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
                 var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
-
                 response.StatusCode = (int)HttpStatusCode.Forbidden;
                 response.ContentType = "application/json";
                 response.ContentLength = errorBuffer.Length;
-
                 await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
             }
         }
-
         private static bool IsAuthorized(HttpRequest request)
         {
             string apiKey = request.Headers["api_key"];
             bool authorized = (apiKey == d_key);
-
             return authorized;
         }
-
+    
         private static void CheckOperatingSystem()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                logger.Log(LogType.Info, "Operating System: Windows");
+                //logger.Log(LogType.Info, "Operating System: Windows");
                 d_os = "win";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                logger.Log(LogType.Info, "Operating System: Linux");
+                //logger.Log(LogType.Info, "Operating System: Linux");
                 d_os = "linux";
             }
             else
             {
-                logger.Log(LogType.Error, "Operating System: Unknown");
+                //logger.Log(LogType.Error, "Operating System: Unknown");
                 d_os = "unknown";
             }
         }
