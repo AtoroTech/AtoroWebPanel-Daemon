@@ -6,7 +6,8 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace McControllerX {
+namespace McControllerX
+{
     public class Program
     {
         public static string d_host = string.Empty;
@@ -24,18 +25,20 @@ namespace McControllerX {
     
      ";
         public static string version = "1.0.0";
-        public static Logger logger = new Logger(); 
+        public static Logger logger = new Logger();
         public static void Main(string[] args)
         {
             Console.Clear();
             Console.WriteLine(mcascii);
             CheckOperatingSystem();
-            if (args.Contains("-version")) {
-                Console.WriteLine("[{0:HH:mm:ss}] (Daemon) You are running version: '"+version+"'", DateTime.Now);
+            if (args.Contains("-version"))
+            {
+                Console.WriteLine("[{0:HH:mm:ss}] (Daemon) You are running version: '" + version + "'", DateTime.Now);
                 Environment.Exit(0x0);
             }
-            else if (args.Contains("-help")) {
-                Console.WriteLine("[{0:HH:mm:ss}] (Daemon) You are running version: '"+version+"'", DateTime.Now);
+            else if (args.Contains("-help"))
+            {
+                Console.WriteLine("[{0:HH:mm:ss}] (Daemon) You are running version: '" + version + "'", DateTime.Now);
                 Console.WriteLine("");
                 Console.WriteLine("-help | Displays all the commands that you can execute");
                 Console.WriteLine("-reset | It resets a full reset of the application");
@@ -43,18 +46,23 @@ namespace McControllerX {
                 Console.WriteLine("");
                 Environment.Exit(0x0);
             }
-            else if (args.Contains("-reset")) {
-                if (d_os == "win") {
+            else if (args.Contains("-reset"))
+            {
+                if (d_os == "win")
+                {
                     d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
                 }
-                else if (d_os == "linux") {
+                else if (d_os == "linux")
+                {
                     d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
                 }
-                else {
+                else
+                {
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Looks like we can't find your os info please use ubuntu or windwos", DateTime.Now);
                     Environment.Exit(0x0);
                 }
-                try {
+                try
+                {
                     var cfg = new ConfigParser(d_settings);
                     string skey = KeyChecker.GenerateStrongKey();
                     cfg.SetValue("Daemon", "key", skey);
@@ -62,34 +70,43 @@ namespace McControllerX {
                     cfg.SetValue("Daemon", "port", "3000");
                     cfg.Save();
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) We updated your daemon settings", DateTime.Now);
-                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Your key is: '"+skey+"'", DateTime.Now);
+                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Your key is: '" + skey + "'", DateTime.Now);
                     Environment.Exit(0x0);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Failed to generate a key: " + ex.Message, DateTime.Now);
                     Environment.Exit(0x0);
                 }
 
             }
-            else if (args.Contains("-resetkey")) {
-                if (d_os == "win") {
+            else if (args.Contains("-resetkey"))
+            {
+                if (d_os == "win")
+                {
                     d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
                 }
-                else if (d_os == "linux") {
+                else if (d_os == "linux")
+                {
                     d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
                 }
-                else {
+                else
+                {
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Looks like we can't find your os info please use ubuntu or windwos", DateTime.Now);
                     Environment.Exit(0x0);
                 }
-                try {
+                try
+                {
                     var cfg = new ConfigParser(d_settings);
                     string skey = KeyChecker.GenerateStrongKey();
                     cfg.SetValue("Daemon", "key", skey);
                     cfg.Save();
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) We updated your daemon settings", DateTime.Now);
-                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Your key is: '"+skey+"'", DateTime.Now);
+                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Your key is: '" + skey + "'", DateTime.Now);
                     Environment.Exit(0x0);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Failed to generate a key: " + ex.Message, DateTime.Now);
                     Environment.Exit(0x0);
                 }
@@ -111,8 +128,8 @@ namespace McControllerX {
                 .Configure(ConfigureApp)
                 .Build();
 
-            logger.Log(LogType.Info, "Daemon started on: "+d_host+":"+d_port);
-            logger.Log(LogType.Info, "Secret key: "+d_key);
+            logger.Log(LogType.Info, "Daemon started on: " + d_host + ":" + d_port);
+            logger.Log(LogType.Info, "Secret key: " + d_key);
             host.Run();
         }
 
@@ -120,14 +137,17 @@ namespace McControllerX {
         {
             try
             {
-                if (d_os == "win") {
+                if (d_os == "win")
+                {
                     d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
                 }
-                else if (d_os == "linux") {
+                else if (d_os == "linux")
+                {
                     d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
                 }
-                else {
-                    logger.Log(LogType.Error,"Looks like we can't find your os info please use ubuntu or windwos");
+                else
+                {
+                    logger.Log(LogType.Error, "Looks like we can't find your os info please use ubuntu or windwos");
                     Environment.Exit(0x0);
                 }
                 var cfg = new ConfigParser(d_settings);
@@ -137,7 +157,7 @@ namespace McControllerX {
                     cfg.SetValue("Daemon", "port", "3000");
                     cfg.SetValue("Daemon", "key", "");
                     cfg.Save();
-                    logger.Log(LogType.Warning,"Looks like this is your first time running our daemon. Please close the app, go into config.ini, and configure your app");
+                    logger.Log(LogType.Warning, "Looks like this is your first time running our daemon. Please close the app, go into config.ini, and configure your app");
                     Environment.Exit(0x0);
                 }
                 d_host = cfg.GetValue("Daemon", "host");
@@ -153,19 +173,19 @@ namespace McControllerX {
                 }
                 if (d_key == "")
                 {
-                    logger.Log(LogType.Error,"Failed to start: 'Please use a strong key'");
+                    logger.Log(LogType.Error, "Failed to start: 'Please use a strong key'");
                     Environment.Exit(0x0);
                 }
                 if (!KeyChecker.isStrongKey(d_key))
                 {
-                    logger.Log(LogType.Error,"Failed to start: 'Please use a strong key'");
+                    logger.Log(LogType.Error, "Failed to start: 'Please use a strong key'");
                     Environment.Exit(0x0);
                 }
-                logger.Log(LogType.Info,"Loaded daemon config from 'config.ini'");
+                logger.Log(LogType.Info, "Loaded daemon config from 'config.ini'");
             }
             catch (Exception ex)
             {
-                logger.Log(LogType.Error,"Failed to load config: " + ex.Message);
+                logger.Log(LogType.Error, "Failed to load config: " + ex.Message);
                 Environment.Exit(0x0);
             }
         }
@@ -274,7 +294,7 @@ namespace McControllerX {
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                logger.Log(LogType.Info,"Operating System: Windows");
+                logger.Log(LogType.Info, "Operating System: Windows");
                 d_os = "win";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -284,9 +304,9 @@ namespace McControllerX {
             }
             else
             {
-                logger.Log(LogType.Error,"Operating System: Unknown");
+                logger.Log(LogType.Error, "Operating System: Unknown");
                 d_os = "unknown";
             }
-        }   
+        }
     }
 }

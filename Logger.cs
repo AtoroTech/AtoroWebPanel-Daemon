@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace McControllerX
 {
     public enum LogType
@@ -70,11 +67,11 @@ namespace McControllerX
             {
                 string logFileNameWithoutExtension = Path.GetFileNameWithoutExtension(logFilePath);
                 string logFileExtension = Path.GetExtension(logFilePath);
+                #pragma warning disable 
                 string logDirectoryPath = Path.GetDirectoryName(logFilePath);
-
                 string newLogFileName = GetUniqueLogFileName(logDirectoryPath, logFileNameWithoutExtension, logFileExtension);
+                #pragma warning restore
                 string newLogFilePath = Path.Combine(logDirectoryPath, newLogFileName);
-
                 File.Move(logFilePath, newLogFilePath);
             }
         }
