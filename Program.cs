@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Salaros.Configuration;
-using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -33,6 +32,15 @@ namespace McControllerX {
             CheckOperatingSystem();
             if (args.Contains("-version")) {
                 Console.WriteLine("[{0:HH:mm:ss}] (Daemon) You are running version: '"+version+"'", DateTime.Now);
+                Environment.Exit(0x0);
+            }
+            else if (args.Contains("-help")) {
+                Console.WriteLine("[{0:HH:mm:ss}] (Daemon) You are running version: '"+version+"'", DateTime.Now);
+                Console.WriteLine("");
+                Console.WriteLine("-help | Displays all the commands that you can execute");
+                Console.WriteLine("-reset | It resets a full reset of the application");
+                Console.WriteLine("-resetkey | It resets the secret key to a new one.");
+                Console.WriteLine("");
                 Environment.Exit(0x0);
             }
             else if (args.Contains("-reset")) {
@@ -279,9 +287,6 @@ namespace McControllerX {
                 logger.Log(LogType.Error,"Operating System: Unknown");
                 d_os = "unknown";
             }
-        }
-        
-        
+        }   
     }
-
 }
