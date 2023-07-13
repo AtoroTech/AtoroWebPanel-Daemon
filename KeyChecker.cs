@@ -9,7 +9,6 @@ namespace McControllerX {
             bool hasUppercase = false;
             bool hasLowercase = false;
             bool hasDigit = false;
-            bool hasSpecialCharacter = false;
 
             if (password.Length < minimumLength)
                 return false;
@@ -22,21 +21,17 @@ namespace McControllerX {
                     hasLowercase = true;
                 else if (char.IsDigit(c))
                     hasDigit = true;
-                else if (!char.IsLetterOrDigit(c))
-                    hasSpecialCharacter = true;
             }
 
-            return hasUppercase && hasLowercase && hasDigit && hasSpecialCharacter;
+            return hasUppercase && hasLowercase && hasDigit;
         }
 
-        public static string GenerateStrongKey(int length = 12)
+        public static string GenerateStrongKey(int length = 32)
         {
             string uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             string lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
             string digitChars = "0123456789";
-            string specialChars = "!@#$%^&*()-=_+[]{}|;:,.<>/?";
-
-            string validChars = uppercaseChars + lowercaseChars + digitChars + specialChars;
+            string validChars = uppercaseChars + lowercaseChars + digitChars;
 
             Random random = new Random();
             string password = new string(Enumerable.Repeat(validChars, length)

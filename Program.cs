@@ -35,7 +35,34 @@ namespace McControllerX {
                 Console.WriteLine("[{0:HH:mm:ss}] (Daemon) You are running version: '"+version+"'", DateTime.Now);
                 Environment.Exit(0x0);
             }
-            else if (args.Contains("-genkey")) {
+            else if (args.Contains("-reset")) {
+                if (d_os == "win") {
+                    d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
+                }
+                else if (d_os == "linux") {
+                    d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
+                }
+                else {
+                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Looks like we can't find your os info please use ubuntu or windwos", DateTime.Now);
+                    Environment.Exit(0x0);
+                }
+                try {
+                    var cfg = new ConfigParser(d_settings);
+                    string skey = KeyChecker.GenerateStrongKey();
+                    cfg.SetValue("Daemon", "key", skey);
+                    cfg.SetValue("Daemon", "host", "127.0.0.1");
+                    cfg.SetValue("Daemon", "port", "3000");
+                    cfg.Save();
+                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) We updated your daemon settings", DateTime.Now);
+                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Your key is: '"+skey+"'", DateTime.Now);
+                    Environment.Exit(0x0);
+                } catch (Exception ex) {
+                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Failed to generate a key: " + ex.Message, DateTime.Now);
+                    Environment.Exit(0x0);
+                }
+
+            }
+            else if (args.Contains("-resetkey")) {
                 if (d_os == "win") {
                     d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
                 }
@@ -76,7 +103,8 @@ namespace McControllerX {
                 .Configure(ConfigureApp)
                 .Build();
 
-            logger.Log(LogType.Info, "Daemon started");
+            logger.Log(LogType.Info, "Daemon started on: "+d_host+":"+d_port);
+            logger.Log(LogType.Info, "Secret key: "+d_key);
             host.Run();
         }
 
