@@ -9,24 +9,21 @@ public class Program
 {
     private static string d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
     public static string d_host = string.Empty;
-    public static string d_protocol = string.Empty;
     public static string d_port = string.Empty;
     public static string d_key = string.Empty;
-    public static string d_ssl = string.Empty;
-
+    
     public static void Main(string[] args)
     {
         LoadSettings();
 
-        var host = new WebHostBuilder()
-            .UseKestrel(options =>
-            {
-                int port = int.Parse(d_port);
-                options.Listen(IPAddress.Any, port);
-            })
-            .Configure(ConfigureApp)
-            .Build();
-
+       var host = new WebHostBuilder()
+        .UseKestrel(options =>
+        {
+            int port = int.Parse(d_port);
+            options.Listen(IPAddress.Parse(d_host), port);
+        })
+        .Configure(ConfigureApp)
+        .Build();
         Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Daemon started", DateTime.Now);
         host.Run();
     }
@@ -50,15 +47,6 @@ public class Program
             d_host = cfg.GetValue("Daemon", "host");
             d_port = cfg.GetValue("Daemon", "port");
             d_key = cfg.GetValue("Daemon", "key");
-            d_ssl = cfg.GetValue("Daemon", "useSSL");
-            if (d_ssl == "true")
-            {
-                d_protocol = "https://";
-            }
-            else
-            {
-                d_protocol = "http://";
-            }
             if (d_host == "")
             {
                 d_host = "127.0.0.1";
