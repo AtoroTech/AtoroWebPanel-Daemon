@@ -1,6 +1,6 @@
 using System;
 
-namespace AtoroWebPanel
+namespace MythicalWebPanel
 {
     public class PowerManager {
         public async void RebootServerLinux() {

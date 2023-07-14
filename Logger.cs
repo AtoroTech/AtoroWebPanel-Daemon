@@ -1,4 +1,4 @@
-namespace AtoroWebPanel
+namespace MythicalWebPanel
 {
     public enum LogType
     {

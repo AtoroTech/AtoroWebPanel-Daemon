@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AtoroWebPanel-Daemon", "AtoroWebPanel-Daemon.csproj", "{E2D011CF-17C2-4D2B-8DC3-97B64CC43B41}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MythicalWebPanel-Daemon", "MythicalWebPanel-Daemon.csproj", "{E2D011CF-17C2-4D2B-8DC3-97B64CC43B41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

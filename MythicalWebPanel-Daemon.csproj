@@ -3,19 +3,19 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>AtoroWebPanel-Daemon</RootNamespace>
+    <RootNamespace>MythicalWebPanel-Daemon</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <StartupObject>AtoroWebPanel.Program</StartupObject>
+    <StartupObject>MythicalWebPanel.Program</StartupObject>
     <ApplicationIcon>MythicalNodesRound.ico</ApplicationIcon>
-    <Title>AtoroWebPanel-Daemon</Title>
-    <Authors>AtoroTech</Authors>
-    <Company>AtoroTech</Company>
-    <PackageProjectUrl>https://github.com/AtoroTech/AtoroWebPanel-Daemon</PackageProjectUrl>
+    <Title>MythicalWebPanel-Daemon</Title>
+    <Authors>MythicalSystems</Authors>
+    <Company>MythicalSystems</Company>
+    <PackageProjectUrl>https://github.com/MythicalSystems/MythicalWebPanel-Daemon</PackageProjectUrl>
     <PackageIcon>117385445.png</PackageIcon>
-    <Description>The daemon for AtoroWebPanel-Daemon</Description>
-    <Copyright>2023 AtoroTech</Copyright>
-    <RepositoryUrl>https://github.com/AtoroTech/AtoroWebPanel-Daemon</RepositoryUrl>
+    <Description>The daemon for MythicalWebPanel-Daemon</Description>
+    <Copyright>2023 MythicalSystems</Copyright>
+    <RepositoryUrl>https://github.com/MythicalSystems/MythicalWebPanel-Daemon</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <AssemblyVersion>1.0.0</AssemblyVersion>

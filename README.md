@@ -1,5 +1,5 @@
-# AtoroWebPanel-Daemon
-The daemon for AtoroWebPanel
+# MythicalWebPanel-Daemon
+The daemon for MythicalWebPanel
  
 ## THIS PRODUCT IS NOT DONE YET DO NOT USE IT
 

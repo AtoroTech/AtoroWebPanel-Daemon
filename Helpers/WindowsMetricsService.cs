@@ -1,6 +1,6 @@
 using System.Management;
 
-namespace AtoroWebPanel
+namespace MythicalWebPanel
 {
     public class WindowsMetricsService
     {

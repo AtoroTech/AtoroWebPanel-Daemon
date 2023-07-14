@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace AtoroWebPanel
+namespace MythicalWebPanel
 {
     public class BatchHelper
     {

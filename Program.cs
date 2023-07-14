@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 
-namespace AtoroWebPanel
+namespace MythicalWebPanel
 {
     public class Program
     {
@@ -75,7 +75,7 @@ namespace AtoroWebPanel
                     string skey = KeyChecker.GenerateStrongKey();
                     cfg.SetValue("Daemon", "key", skey);
                     cfg.SetValue("Daemon", "host", "127.0.0.1");
-                    cfg.SetValue("Daemon", "port", "3000");
+                    cfg.SetValue("Daemon", "port", "1953");
                     cfg.Save();
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) We updated your daemon settings", DateTime.Now);
                     Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Your key is: '" + skey + "'", DateTime.Now);
@@ -123,7 +123,7 @@ namespace AtoroWebPanel
                 Console.WriteLine("[{0:HH:mm:ss}] (Daemon) This is an invalid startup argument. Please use '-help' to get more information.", DateTime.Now);
                 Environment.Exit(0x0);
             }
-            logger.Log(LogType.Info, "Please wait while we start AtoroWebPanel-Daemon");
+            logger.Log(LogType.Info, "Please wait while we start MythicalWebPanel-Daemon");
             LoadSettings();
             getOsInfo();
             var host = new WebHostBuilder()
@@ -221,7 +221,7 @@ namespace AtoroWebPanel
                 if (!File.Exists(d_settings))
                 {
                     cfg.SetValue("Daemon", "host", "127.0.0.1");
-                    cfg.SetValue("Daemon", "port", "3000");
+                    cfg.SetValue("Daemon", "port", "1953");
                     cfg.SetValue("Daemon", "key", "");
                     cfg.Save();
                     logger.Log(LogType.Warning, "Looks like this is your first time running our daemon. Please close the app, go into config.ini, and configure your app");
@@ -236,7 +236,7 @@ namespace AtoroWebPanel
                 }
                 if (d_port == "")
                 {
-                    d_port = "3000";
+                    d_port = "1953";
                 }
                 if (d_key == "")
                 {
