@@ -22,12 +22,13 @@ namespace AtoroWebPanel
         public static string os_ram = string.Empty;
         public static string os_uptime = string.Empty;
         public static string mcascii = @" 
-    __  __       _____            _             _ _        __   __
-    |  \/  |     / ____|          | |           | | |       \ \ / /
-    | \  / | ___| |     ___  _ __ | |_ _ __ ___ | | | ___ _ _\ V / 
-    | |\/| |/ __| |    / _ \| '_ \| __| '__/ _ \| | |/ _ \ '__> <  
-    | |  | | (__| |___| (_) | | | | |_| | | (_) | | |  __/ | / . \ 
-    |_|  |_|\___|\_____\___/|_| |_|\__|_|  \___/|_|_|\___|_|/_/ \_\
+          _              __          __  _     _____                 _ 
+     /\  | |             \ \        / / | |   |  __ \               | |
+    /  \ | |_ ___  _ __ __\ \  /\  / /__| |__ | |__) |_ _ _ __   ___| |
+   / /\ \| __/ _ \| '__/ _ \ \/  \/ / _ \ '_ \|  ___/ _` | '_ \ / _ \ |
+  / ____ \ || (_) | | | (_) \  /\  /  __/ |_) | |  | (_| | | | |  __/ |
+ /_/    \_\__\___/|_|  \___/ \/  \/ \___|_.__/|_|   \__,_|_| |_|\___|_|
+                                                                       
     
     ";
         public static string version = "1.0.0";
@@ -172,9 +173,11 @@ namespace AtoroWebPanel
                     string osCpu = await LinuxMetricsService.GetCpuModel();
                     os_cpu = osCpu.Replace("\n", "");
                     string osDisk = await LinuxMetricsService.GetTotalDisk();
-                    os_disk = osDisk.Replace("\n", "");
+                    string fos_disk = osDisk.Replace("\n", "");
+                    os_disk = fos_disk + " KB";
                     string osRam = await LinuxMetricsService.GetTotalMemory();
-                    os_ram = osRam.Replace("\n", "");
+                    string fos_ram = osRam.Replace("\n", "");
+                    os_ram = fos_ram + " KB";
                     string osUptime = await LinuxMetricsService.GetUptime();
                     os_uptime = osUptime.Replace("\n", "");
                     logger.Log(LogType.Info, "Operating System: "+os_name);
@@ -281,6 +284,24 @@ namespace AtoroWebPanel
                             await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
                             break;
                         }
+                    case "system/info":
+                        {
+                            var osInfo = new
+                            {
+                                os_name,
+                                os_cpu,
+                                os_disk,
+                                os_ram,
+                                os_uptime
+                            };
+                            var osInfoJson = Newtonsoft.Json.JsonConvert.SerializeObject(osInfo);
+                            var osInfoBuffer = Encoding.UTF8.GetBytes(osInfoJson);
+                            response.StatusCode = (int)HttpStatusCode.OK;
+                            response.ContentType = "application/json";
+                            response.ContentLength = osInfoBuffer.Length;
+                            await response.Body.WriteAsync(osInfoBuffer, 0, osInfoBuffer.Length);
+                            break;
+                        }
                     case "test":
                         {
                             var presponse = new
@@ -330,7 +351,7 @@ namespace AtoroWebPanel
         }
         private static bool IsAuthorized(HttpRequest request)
         {
-            string apiKey = request.Headers["api_key"];
+            string apiKey = request.Headers["Authorization"];
             bool authorized = (apiKey == d_key);
             return authorized;
         }
@@ -339,17 +360,14 @@ namespace AtoroWebPanel
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                //logger.Log(LogType.Info, "Operating System: Windows");
                 d_os = "win";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                //logger.Log(LogType.Info, "Operating System: Linux");
                 d_os = "linux";
             }
             else
             {
-                //logger.Log(LogType.Error, "Operating System: Unknown");
                 d_os = "unknown";
             }
         }
