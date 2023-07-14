@@ -1,6 +1,4 @@
-using McControllerX;
-
-namespace McControllerX
+namespace AtoroWebPanel
 {
     public class LinuxMetricsService
 {
@@ -16,21 +14,19 @@ namespace McControllerX
         return await BashHelper.ExecuteCommand("lscpu | grep 'Model name' | awk -F: '{print $2}' | sed 's/^ *//'");
     }
 
-    public async Task<long> GetTotalMemory()
+    public async Task<string> GetTotalMemory()
     {
-        return long.Parse(
+        return 
             await BashHelper
-                .ExecuteCommand("grep 'MemTotal:' /proc/meminfo | awk '{print $2}'")
-        );
+                .ExecuteCommand("grep 'MemTotal:' /proc/meminfo | awk '{print $2}'");
     }
 
     
-    public async Task<long> GetTotalDisk()
+    public async Task<string> GetTotalDisk()
     {
-        return long.Parse(
+        return 
             await BashHelper
-                .ExecuteCommand("df -B 1 --total | tail -1 | awk '{print $2}'")
-        );
+                .ExecuteCommand("df -B 1 --total | tail -1 | awk '{print $2}'");
     }
     public async Task<string> GetUptime()
     {

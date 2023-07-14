@@ -1,6 +1,6 @@
 using System.Management;
 
-namespace McControllerX
+namespace AtoroWebPanel
 {
     public class WindowsMetricsService
     {
@@ -27,11 +27,11 @@ namespace McControllerX
             return "Unknown";
         }
 
-        public ulong GetTotalDiskSpace()
+        public string GetTotalDiskSpace()
         {
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Size FROM Win32_LogicalDisk WHERE DriveType = 3");
             ManagementObjectCollection objects = searcher.Get();
-            ulong totalDiskSpace = 0;
+            string totalDiskSpace = "0";
             foreach (ManagementObject obj in objects)
             {
                 totalDiskSpace += Convert.ToUInt64(obj["Size"]);
@@ -39,27 +39,30 @@ namespace McControllerX
             return totalDiskSpace;
         }
 
-        public ulong GetTotalRAM()
+        public string GetTotalRAM()
         {
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
             ManagementObjectCollection objects = searcher.Get();
             foreach (ManagementObject obj in objects)
             {
-                return Convert.ToUInt64(obj["TotalVisibleMemorySize"]);
+                return obj["TotalVisibleMemorySize"].ToString();
             }
-            return 0;
+            return "0";
         }
-        public TimeSpan GetUptime()
+
+        public string GetUptime()
         {
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT LastBootUpTime FROM Win32_OperatingSystem");
             ManagementObjectCollection objects = searcher.Get();
             foreach (ManagementObject obj in objects)
             {
                 DateTime lastBootUpTime = ManagementDateTimeConverter.ToDateTime(obj["LastBootUpTime"].ToString());
-                return DateTime.Now - lastBootUpTime;
+                TimeSpan uptime = DateTime.Now - lastBootUpTime;
+                return uptime.ToString();
             }
-            return TimeSpan.Zero;
+            return TimeSpan.Zero.ToString();
         }
+
         #pragma warning restore
     }
 }

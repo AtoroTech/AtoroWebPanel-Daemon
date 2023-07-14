@@ -1,7 +1,7 @@
-using System;
+using System.Security.Cryptography;
+using System.Text;
 
-
-namespace McControllerX {
+namespace AtoroWebPanel {
     public class KeyChecker
     {
         public static bool isStrongKey(string password, int minimumLength = 8)
@@ -28,16 +28,25 @@ namespace McControllerX {
 
         public static string GenerateStrongKey(int length = 32)
         {
-            string uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            string lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
-            string digitChars = "0123456789";
+            const string uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
+            const string digitChars = "0123456789";
             string validChars = uppercaseChars + lowercaseChars + digitChars;
+            #pragma warning disable
+            using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+            {
+                byte[] randomBytes = new byte[length];
+                rng.GetBytes(randomBytes);
 
-            Random random = new Random();
-            string password = new string(Enumerable.Repeat(validChars, length)
-                                      .Select(s => s[random.Next(s.Length)]).ToArray());
+                StringBuilder sb = new StringBuilder(length);
+                foreach (byte b in randomBytes)
+                {
+                    sb.Append(validChars[b % validChars.Length]);
+                }
 
-            return password;
+                return sb.ToString();
+            }
+            #pragma warning restore
         }
     }
 }

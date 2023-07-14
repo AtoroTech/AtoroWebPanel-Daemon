@@ -1,4 +1,4 @@
-namespace McControllerX
+namespace AtoroWebPanel
 {
     public enum LogType
     {

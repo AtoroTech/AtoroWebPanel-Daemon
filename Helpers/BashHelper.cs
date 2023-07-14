@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace McControllerX
+namespace AtoroWebPanel
 {
     public class BashHelper
     {

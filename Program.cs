@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 
-namespace McControllerX
+namespace AtoroWebPanel
 {
     public class Program
     {
@@ -18,8 +18,8 @@ namespace McControllerX
         public static string d_settings = string.Empty;        
         public static string os_name = string.Empty;
         public static string os_cpu = string.Empty;
-        public static long os_disk;
-        public static long os_ram;
+        public static string os_disk = string.Empty;
+        public static string os_ram = string.Empty;
         public static string os_uptime = string.Empty;
         public static string mcascii = @" 
     __  __       _____            _             _ _        __   __
@@ -122,7 +122,7 @@ namespace McControllerX
                 Console.WriteLine("[{0:HH:mm:ss}] (Daemon) This is an invalid startup argument. Please use '-help' to get more information.", DateTime.Now);
                 Environment.Exit(0x0);
             }
-            logger.Log(LogType.Info, "Please wait while we start McControllerX");
+            logger.Log(LogType.Info, "Please wait while we start AtoroWebPanel-Daemon");
             LoadSettings();
             getOsInfo();
             var host = new WebHostBuilder()
@@ -140,27 +140,48 @@ namespace McControllerX
         }
         private static async void getOsInfo() {
             if (d_os == "win") {
-
-            }
-            else if (d_os == "linux") {
-                BashHelper bashHelper = new BashHelper();
-                LinuxMetricsService metricsService = new LinuxMetricsService(bashHelper);
-                try
-                {
-                    string osName = await metricsService.GetOsName();
+                try {
+                    WindowsMetricsService winMetricsService = new WindowsMetricsService();
+                    string osName = winMetricsService.GetOperatingSystem();
                     os_name = osName.Replace("\n", "");
-                    string osCpu = await metricsService.GetCpuModel();
+                    string osCpu = winMetricsService.GetCpuModel();
                     os_cpu = osCpu.Replace("\n", "");
-                    os_disk = await metricsService.GetTotalDisk();
-                    os_ram = await metricsService.GetTotalMemory();
-                    string osUptime = await metricsService.GetUptime();
+                    string osDisk = winMetricsService.GetTotalDiskSpace();
+                    os_disk = osDisk.Replace("\n", "");
+                    string osRam = winMetricsService.GetTotalRAM();
+                    os_ram = osRam.Replace("\n", "");
+                    string osUptime = winMetricsService.GetUptime();
                     os_uptime = osUptime.Replace("\n", "");
                     logger.Log(LogType.Info, "Operating System: "+os_name);
                     logger.Log(LogType.Info, "CPU: "+os_cpu);
                     logger.Log(LogType.Info, "DISK: "+os_disk);
                     logger.Log(LogType.Info, "RAM: "+os_ram);
                     logger.Log(LogType.Info, "UPTIME: "+os_uptime);
-                    
+                } catch (Exception ex) {
+                    logger.Log(LogType.Error, "Faild to get the os info: '"+ex.Message+"'");
+
+                }
+            }
+            else if (d_os == "linux") {
+                try
+                {
+                    BashHelper bashHelper = new BashHelper();
+                    LinuxMetricsService LinuxMetricsService = new LinuxMetricsService(bashHelper);
+                    string osName = await LinuxMetricsService.GetOsName();
+                    os_name = osName.Replace("\n", "");
+                    string osCpu = await LinuxMetricsService.GetCpuModel();
+                    os_cpu = osCpu.Replace("\n", "");
+                    string osDisk = await LinuxMetricsService.GetTotalDisk();
+                    os_disk = osDisk.Replace("\n", "");
+                    string osRam = await LinuxMetricsService.GetTotalMemory();
+                    os_ram = osRam.Replace("\n", "");
+                    string osUptime = await LinuxMetricsService.GetUptime();
+                    os_uptime = osUptime.Replace("\n", "");
+                    logger.Log(LogType.Info, "Operating System: "+os_name);
+                    logger.Log(LogType.Info, "CPU: "+os_cpu);
+                    logger.Log(LogType.Info, "DISK: "+os_disk);
+                    logger.Log(LogType.Info, "RAM: "+os_ram);
+                    logger.Log(LogType.Info, "UPTIME: "+os_uptime);
                 }
                 catch (Exception ex)
                 {
@@ -168,6 +189,12 @@ namespace McControllerX
                 }
             }
             else {
+                os_name = "Unknown";
+                os_cpu = "Unknown";
+                os_disk = "Unknown";
+                os_ram = "Unknown";
+                os_uptime = "Unknown";
+                logger.Log(LogType.Error, "Faild to get the os info'");
             }
         }
         private static void LoadSettings()
