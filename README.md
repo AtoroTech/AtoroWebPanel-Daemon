@@ -1,6 +1,5 @@
-![Logo](https://i.imgur.com/xI3GLFc.jpeg)
-# McControllerX-Daemon
-The daemon for McControllerX
+# AtoroWebPanel-Daemon
+The daemon for AtoroWebPanel
  
 ## THIS PRODUCT IS NOT DONE YET DO NOT USE IT
 
