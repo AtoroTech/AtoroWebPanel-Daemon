@@ -284,6 +284,52 @@ namespace AtoroWebPanel
                             await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
                             break;
                         }
+                    case "system/reboot":
+                        {
+                            PowerManager pw = new PowerManager();
+                            if (d_os == "win") {
+                                pw.RebootServerWindwos();
+                            }
+                            else if (d_os == "linux")
+                            {
+                                pw.RebootServerLinux();
+                            }                            
+                            var rebootResponse = new
+                            {
+                                message = "Server reboot initiated",
+                                status = "Please wait..."
+                            };
+                            var rebootJson = Newtonsoft.Json.JsonConvert.SerializeObject(rebootResponse);
+                            var rebootBuffer = Encoding.UTF8.GetBytes(rebootJson);
+                            response.StatusCode = (int)HttpStatusCode.OK;
+                            response.ContentType = "application/json";
+                            response.ContentLength = rebootBuffer.Length;
+                            await response.Body.WriteAsync(rebootBuffer, 0, rebootBuffer.Length);
+                            break;
+                        }
+                    case "system/shutdown":
+                        {
+                            PowerManager pw = new PowerManager();
+                            if (d_os == "win") {
+                                pw.ShutdownServerWindwos();
+                            }
+                            else if (d_os == "linux")
+                            {
+                                pw.ShutdownServerLinux();
+                            }                            
+                            var rebootResponse = new
+                            {
+                                message = "Server shutdown initiated",
+                                status = "Please wait..."
+                            };
+                            var rebootJson = Newtonsoft.Json.JsonConvert.SerializeObject(rebootResponse);
+                            var rebootBuffer = Encoding.UTF8.GetBytes(rebootJson);
+                            response.StatusCode = (int)HttpStatusCode.OK;
+                            response.ContentType = "application/json";
+                            response.ContentLength = rebootBuffer.Length;
+                            await response.Body.WriteAsync(rebootBuffer, 0, rebootBuffer.Length);
+                            break;
+                        }
                     case "system/info":
                         {
                             var osInfo = new
@@ -355,7 +401,7 @@ namespace AtoroWebPanel
             bool authorized = (apiKey == d_key);
             return authorized;
         }
-    
+
         private static void CheckOperatingSystem()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
