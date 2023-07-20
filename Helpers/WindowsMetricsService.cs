@@ -1,10 +1,10 @@
 using System.Management;
+#pragma warning disable 
 
 namespace MythicalWebPanel
 {
     public class WindowsMetricsService
     {
-        #pragma warning disable 
         public string GetOperatingSystem()
         {
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem");
@@ -62,7 +62,5 @@ namespace MythicalWebPanel
             }
             return TimeSpan.Zero.ToString();
         }
-
-        #pragma warning restore
     }
 }
