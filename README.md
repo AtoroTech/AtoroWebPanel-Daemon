@@ -1,5 +1,5 @@
 # MythicalWebPanel-Daemon
-The daemon for MythicalWebPanel
+The old daemon for MythicalWebPanel
  
 ## THIS PRODUCT IS NOT DONE YET DO NOT USE IT
 
