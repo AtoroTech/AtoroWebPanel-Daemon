@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Salaros.Configuration;
 using System.Net;
-using System.Runtime.InteropServices;
 using System.Text;
+using MythicalWebPanel;
 
 
 namespace MythicalWebPanel
@@ -15,30 +15,34 @@ namespace MythicalWebPanel
         public static string d_port = string.Empty;
         public static string d_key = string.Empty;
         public static string d_os = string.Empty;
-        public static string d_settings = string.Empty;        
+        public static string d_settings = string.Empty;
         public static string os_name = string.Empty;
         public static string os_cpu = string.Empty;
         public static string os_disk = string.Empty;
         public static string os_ram = string.Empty;
         public static string os_uptime = string.Empty;
         public static string mcascii = @" 
-          _              __          __  _     _____                 _ 
-     /\  | |             \ \        / / | |   |  __ \               | |
-    /  \ | |_ ___  _ __ __\ \  /\  / /__| |__ | |__) |_ _ _ __   ___| |
-   / /\ \| __/ _ \| '__/ _ \ \/  \/ / _ \ '_ \|  ___/ _` | '_ \ / _ \ |
-  / ____ \ || (_) | | | (_) \  /\  /  __/ |_) | |  | (_| | | | |  __/ |
- /_/    \_\__\___/|_|  \___/ \/  \/ \___|_.__/|_|   \__,_|_| |_|\___|_|
-                                                                       
+  __  __       _   _     _           ___          __  _     _____                 _ 
+ |  \/  |     | | | |   (_)         | \ \        / / | |   |  __ \               | |
+ | \  / |_   _| |_| |__  _  ___ __ _| |\ \  /\  / /__| |__ | |__) |_ _ _ __   ___| |
+ | |\/| | | | | __| '_ \| |/ __/ _` | | \ \/  \/ / _ \ '_ \|  ___/ _` | '_ \ / _ \ |
+ | |  | | |_| | |_| | | | | (_| (_| | |  \  /\  /  __/ |_) | |  | (_| | | | |  __/ |
+ |_|  |_|\__, |\__|_| |_|_|\___\__,_|_|   \/  \/ \___|_.__/|_|   \__,_|_| |_|\___|_|
+          __/ |                                                                     
+         |___/                                                                      
     
     ";
         public static string version = "1.0.0";
         public static Logger logger = new Logger();
-        
+
         public static void Main(string[] args)
         {
             Console.Clear();
             Console.WriteLine(mcascii);
-            CheckOperatingSystem();
+            if (!System.OperatingSystem.IsLinux())
+            {
+                Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Sorry you have to be on debain / linux to use our daemon");
+            }
             if (args.Contains("-version"))
             {
                 Console.WriteLine("[{0:HH:mm:ss}] (Daemon) You are running version: '" + version + "'", DateTime.Now);
@@ -56,19 +60,7 @@ namespace MythicalWebPanel
             }
             else if (args.Contains("-reset"))
             {
-                if (d_os == "win")
-                {
-                    d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
-                }
-                else if (d_os == "linux")
-                {
-                    d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
-                }
-                else
-                {
-                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Looks like we can't find your os info please use ubuntu or windwos", DateTime.Now);
-                    Environment.Exit(0x0);
-                }
+                d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
                 try
                 {
                     var cfg = new ConfigParser(d_settings);
@@ -89,19 +81,7 @@ namespace MythicalWebPanel
             }
             else if (args.Contains("-resetkey"))
             {
-                if (d_os == "win")
-                {
-                    d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
-                }
-                else if (d_os == "linux")
-                {
-                    d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
-                }
-                else
-                {
-                    Console.WriteLine("[{0:HH:mm:ss}] (Daemon) Looks like we can't find your os info please use ubuntu or windwos", DateTime.Now);
-                    Environment.Exit(0x0);
-                }
+                d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
                 try
                 {
                     var cfg = new ConfigParser(d_settings);
@@ -137,86 +117,42 @@ namespace MythicalWebPanel
             logger.Log(LogType.Info, "Daemon started on: " + d_host + ":" + d_port);
             logger.Log(LogType.Info, "Secret key: " + d_key);
             host.Run();
-            
-        }
-        private static async void getOsInfo() {
-            if (d_os == "win") {
-                try {
-                    WindowsMetricsService winMetricsService = new WindowsMetricsService();
-                    string osName = winMetricsService.GetOperatingSystem();
-                    os_name = osName.Replace("\n", "");
-                    string osCpu = winMetricsService.GetCpuModel();
-                    os_cpu = osCpu.Replace("\n", "");
-                    string osDisk = winMetricsService.GetTotalDiskSpace();
-                    os_disk = osDisk.Replace("\n", "");
-                    string osRam = winMetricsService.GetTotalRAM();
-                    os_ram = osRam.Replace("\n", "");
-                    string osUptime = winMetricsService.GetUptime();
-                    os_uptime = osUptime.Replace("\n", "");
-                    logger.Log(LogType.Info, "Operating System: "+os_name);
-                    logger.Log(LogType.Info, "CPU: "+os_cpu);
-                    logger.Log(LogType.Info, "DISK: "+os_disk);
-                    logger.Log(LogType.Info, "RAM: "+os_ram);
-                    logger.Log(LogType.Info, "UPTIME: "+os_uptime);
-                } catch (Exception ex) {
-                    logger.Log(LogType.Error, "Faild to get the os info: '"+ex.Message+"'");
 
-                }
+        }
+        private static async void getOsInfo()
+        {
+            try
+            {
+                BashHelper bashHelper = new BashHelper();
+                LinuxMetricsService LinuxMetricsService = new LinuxMetricsService(bashHelper);
+                string osName = await LinuxMetricsService.GetOsName();
+                os_name = osName.Replace("\n", "");
+                string osCpu = await LinuxMetricsService.GetCpuModel();
+                os_cpu = osCpu.Replace("\n", "");
+                string osDisk = await LinuxMetricsService.GetTotalDisk();
+                string fos_disk = osDisk.Replace("\n", "");
+                os_disk = fos_disk + " KB";
+                string osRam = await LinuxMetricsService.GetTotalMemory();
+                string fos_ram = osRam.Replace("\n", "");
+                os_ram = fos_ram + " KB";
+                string osUptime = await LinuxMetricsService.GetUptime();
+                os_uptime = osUptime.Replace("\n", "");
+                logger.Log(LogType.Info, "Operating System: " + os_name);
+                logger.Log(LogType.Info, "CPU: " + os_cpu);
+                logger.Log(LogType.Info, "DISK: " + os_disk);
+                logger.Log(LogType.Info, "RAM: " + os_ram);
+                logger.Log(LogType.Info, "UPTIME: " + os_uptime);
             }
-            else if (d_os == "linux") {
-                try
-                {
-                    BashHelper bashHelper = new BashHelper();
-                    LinuxMetricsService LinuxMetricsService = new LinuxMetricsService(bashHelper);
-                    string osName = await LinuxMetricsService.GetOsName();
-                    os_name = osName.Replace("\n", "");
-                    string osCpu = await LinuxMetricsService.GetCpuModel();
-                    os_cpu = osCpu.Replace("\n", "");
-                    string osDisk = await LinuxMetricsService.GetTotalDisk();
-                    string fos_disk = osDisk.Replace("\n", "");
-                    os_disk = fos_disk + " KB";
-                    string osRam = await LinuxMetricsService.GetTotalMemory();
-                    string fos_ram = osRam.Replace("\n", "");
-                    os_ram = fos_ram + " KB";
-                    string osUptime = await LinuxMetricsService.GetUptime();
-                    os_uptime = osUptime.Replace("\n", "");
-                    logger.Log(LogType.Info, "Operating System: "+os_name);
-                    logger.Log(LogType.Info, "CPU: "+os_cpu);
-                    logger.Log(LogType.Info, "DISK: "+os_disk);
-                    logger.Log(LogType.Info, "RAM: "+os_ram);
-                    logger.Log(LogType.Info, "UPTIME: "+os_uptime);
-                }
-                catch (Exception ex)
-                {
-                    logger.Log(LogType.Error, "Faild to get the os info: '"+ex.Message+"'");
-                }
-            }
-            else {
-                os_name = "Unknown";
-                os_cpu = "Unknown";
-                os_disk = "Unknown";
-                os_ram = "Unknown";
-                os_uptime = "Unknown";
-                logger.Log(LogType.Error, "Faild to get the os info'");
+            catch (Exception ex)
+            {
+                logger.Log(LogType.Error, "Faild to get the os info: '" + ex.Message + "'");
             }
         }
         private static void LoadSettings()
         {
             try
             {
-                if (d_os == "win")
-                {
-                    d_settings = Directory.GetCurrentDirectory() + @"\config.ini";
-                }
-                else if (d_os == "linux")
-                {
-                    d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
-                }
-                else
-                {
-                    logger.Log(LogType.Error, "Looks like we can't find your os info please use ubuntu or windwos");
-                    Environment.Exit(0x0);
-                }
+                d_settings = Directory.GetCurrentDirectory() + @"/config.ini";
                 var cfg = new ConfigParser(d_settings);
                 if (!File.Exists(d_settings))
                 {
@@ -264,7 +200,8 @@ namespace MythicalWebPanel
         {
             var request = context.Request;
             var response = context.Response;
-            if (IsAuthorized(request))
+            var (isValidKey, keyMessage) = IsAuthorized(request);
+            if (isValidKey)
             {
                 var absolutePath = request.Path.Value.TrimStart('/');
                 switch (absolutePath)
@@ -287,13 +224,7 @@ namespace MythicalWebPanel
                     case "system/reboot":
                         {
                             PowerManager pw = new PowerManager();
-                            if (d_os == "win") {
-                                pw.RebootServerWindwos();
-                            }
-                            else if (d_os == "linux")
-                            {
-                                pw.RebootServerLinux();
-                            }                            
+                            pw.RebootServerLinux();
                             var rebootResponse = new
                             {
                                 message = "Server reboot initiated",
@@ -307,16 +238,53 @@ namespace MythicalWebPanel
                             await response.Body.WriteAsync(rebootBuffer, 0, rebootBuffer.Length);
                             break;
                         }
+                    case "webspace/create":
+                        {
+                            string url = "webpanel.mythicalsystems.tech";
+                            string name = "mythical_website";
+                            bool sslEnabled = true;
+                            string description = "Mythical WebPanel Website";
+                            string user = "ftpuser";
+                            string password = "ftppassword";
+                            string phpversion = "8.1";
+
+                            try
+                            {
+                                CreateWebSpace.CreateWebsite(url, phpversion, name, sslEnabled, description, user, password);
+                                var successResponse = new
+                                {
+                                    message = "Website created successfully",
+                                    status = "success"
+                                };
+                                var successJson = Newtonsoft.Json.JsonConvert.SerializeObject(successResponse);
+                                var successBuffer = Encoding.UTF8.GetBytes(successJson);
+                                response.StatusCode = (int)HttpStatusCode.OK;
+                                response.ContentType = "application/json";
+                                response.ContentLength = successBuffer.Length;
+                                await response.Body.WriteAsync(successBuffer, 0, successBuffer.Length);
+                            }
+                            catch (Exception ex)
+                            {
+                                var failureResponse = new
+                                {
+                                    message = $"Failed to create website: {ex.Message}",
+                                    status = "fail"
+                                };
+                                var failureJson = Newtonsoft.Json.JsonConvert.SerializeObject(failureResponse);
+                                var failureBuffer = Encoding.UTF8.GetBytes(failureJson);
+                                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                                response.ContentType = "application/json";
+                                response.ContentLength = failureBuffer.Length;
+                                await response.Body.WriteAsync(failureBuffer, 0, failureBuffer.Length);
+                                logger.Log(LogType.Error,"Faild to create webspace: "+ex.Message);
+                            }
+                            break;
+                        }
+
                     case "system/shutdown":
                         {
                             PowerManager pw = new PowerManager();
-                            if (d_os == "win") {
-                                pw.ShutdownServerWindwos();
-                            }
-                            else if (d_os == "linux")
-                            {
-                                pw.ShutdownServerLinux();
-                            }                            
+                            pw.ShutdownServerLinux();
                             var rebootResponse = new
                             {
                                 message = "Server shutdown initiated",
@@ -384,8 +352,8 @@ namespace MythicalWebPanel
             {
                 var errorResponse = new
                 {
-                    message = "Unauthorized",
-                    error = "API key not provided or invalid."
+                    message = keyMessage,
+                    error = "Invalid API key."
                 };
                 var errorJson = Newtonsoft.Json.JsonConvert.SerializeObject(errorResponse);
                 var errorBuffer = Encoding.UTF8.GetBytes(errorJson);
@@ -395,27 +363,22 @@ namespace MythicalWebPanel
                 await response.Body.WriteAsync(errorBuffer, 0, errorBuffer.Length);
             }
         }
-        private static bool IsAuthorized(HttpRequest request)
+        private static (bool isValid, string message) IsAuthorized(HttpRequest request)
         {
             string apiKey = request.Headers["Authorization"];
-            bool authorized = (apiKey == d_key);
-            return authorized;
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return (false, "API key is empty.");
+            }
+
+            if (apiKey == d_key)
+            {
+                return (true, "Authorized.");
+            }
+
+            return (false, "API key is invalid.");
         }
 
-        private static void CheckOperatingSystem()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                d_os = "win";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                d_os = "linux";
-            }
-            else
-            {
-                d_os = "unknown";
-            }
-        }
     }
+
 }
