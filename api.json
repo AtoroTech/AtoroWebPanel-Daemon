@@ -1,0 +1,222 @@
+
+{
+  "version": 6,
+  "_comment": "THIS FILE IS FILLED WITH THE API REQUESTS FOR THE OLD DAEMON FOR MythicalWebPanel in order to read it you have to install Talended API Tester and import this project here is a link: https://chrome.google.com/webstore/detail/talend-api-tester-free-ed/aejoelaoggembcahagimdiliamlcdmfm",
+  "entities": [
+    {
+      "entity": {
+        "type": "Project",
+        "description": "",
+        "id": "f0bb609e-a6dd-4eda-b96a-a0fe7c638e40",
+        "name": "MythicalWebPanelDaemon"
+      },
+      "children": [
+        {
+          "entity": {
+            "type": "Scenario",
+            "description": "Here are all the api requests you can use for our daemon",
+            "id": "0ae04286-bfee-45ff-bafe-66aca97a1251",
+            "name": "System"
+          },
+          "children": [
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "secure": true,
+                    "name": "https",
+                    "version": "V11"
+                  },
+                  "host": "deve.mythicalsystems.tech",
+                  "path": "/"
+                },
+                "id": "eac75e21-1863-4795-923d-3bdaa22d2502",
+                "name": "/",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "DOBcWmQQF9DkkjBbIbrKsatnEFjSKRwl"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "secure": true,
+                    "name": "https",
+                    "version": "V11"
+                  },
+                  "host": "node-1.mythicalsystems.tech",
+                  "path": "/system/info"
+                },
+                "id": "82d04d9c-78a4-4a94-9d5f-a2ebf16bf6c2",
+                "name": "system/info/",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "msCDFyDE50Utmsgqz9iC7GKCDjd4xKOD"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "secure": true,
+                    "name": "https",
+                    "version": "V11"
+                  },
+                  "host": "deve.mythicalsystems.tech",
+                  "path": "/system/reboot"
+                },
+                "id": "83ec2b7e-486d-4488-bb4b-d7d87b6815ca",
+                "name": "system/reboot/",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "msCDFyDE50Utmsgqz9iC7GKCDjd4xKOD"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "secure": true,
+                    "name": "https",
+                    "version": "V11"
+                  },
+                  "host": "deve.mythicalsystems.tech",
+                  "path": "/system/shutdown"
+                },
+                "id": "d4b218ec-9742-452f-aa6f-67c0c79363bc",
+                "name": "system/shutdown/",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "DOBcWmQQF9DkkjBbIbrKsatnEFjSKRwl"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "secure": true,
+                    "name": "https",
+                    "version": "V11"
+                  },
+                  "host": "node-1.mythicalsystems.tech",
+                  "path": "/webspace/create"
+                },
+                "id": "48545c1b-3063-4f62-9d86-29caf22e0f08",
+                "name": "webspace/create/",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "eurK4VWdr1aiuK4NWOIX8bggijPUZvyX"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
